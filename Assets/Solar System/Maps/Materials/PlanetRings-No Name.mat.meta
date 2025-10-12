@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: dd1e74ee900e83842b1e9bd5b4c22604
+timeCreated: 1470084325
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 2178
+  packageName: The Solar System
+  packageVersion: 2.0
+  assetPath: Assets/Solar System/Maps/Materials/PlanetRings-No Name.mat
+  uploadId: 130049

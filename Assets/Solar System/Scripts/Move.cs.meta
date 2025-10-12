@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 9c30837f08c25d243b24d99f21d944fe
+timeCreated: 1469628249
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 2178
+  packageName: The Solar System
+  packageVersion: 2.0
+  assetPath: Assets/Solar System/Scripts/Move.cs
+  uploadId: 130049
