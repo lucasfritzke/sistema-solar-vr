@@ -9,14 +9,20 @@ public class SolarSystemManager : MonoBehaviour
     {
         public string planetName;
         public Transform targetPosition;
-        public Vector3 lookAtOffset = Vector3.zero;
+        public Vector3 cameraOffset = new Vector3(0, 5, -10);
         public float moveDuration = 3f;
         public string description;
     }
 
+    [Header("Configurações")]
     public List<PlanetCutscene> planets = new List<PlanetCutscene>();
+    public Vector3 panoramicViewPosition = new Vector3(0, 100, -200);
+    public Vector3 panoramicLookAtPosition = Vector3.zero;
+    public float panoramicRotationSpeed = 10f;
+    
     private int currentPlanetIndex = 0;
     private bool isMoving = false;
+    private bool isPanoramicMode = false;
     
     private Transform mainCamera;
 
@@ -24,8 +30,21 @@ public class SolarSystemManager : MonoBehaviour
     {
         mainCamera = Camera.main.transform;
         
+        // Desativa TODOS os scripts de movimento/rotação no início
+        DisableAllPlanetMovements();
+        
         if (planets.Count > 0)
             StartCoroutine(PlayCutscene(0));
+    }
+
+    void Update()
+    {
+        // Rotaciona a câmera no modo panorâmico
+        if (isPanoramicMode)
+        {
+            mainCamera.RotateAround(panoramicLookAtPosition, Vector3.up, panoramicRotationSpeed * Time.deltaTime);
+            mainCamera.LookAt(panoramicLookAtPosition);
+        }
     }
 
     public void NextPlanet()
@@ -40,131 +59,97 @@ public class SolarSystemManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("Fim da jornada pelo sistema solar!");
-            currentPlanetIndex = 0;
-            StartCoroutine(PlayCutscene(0));
+            // Chegou ao final - vai para vista panorâmica
+            StartCoroutine(GoToPanoramicView());
         }
     }
 
     IEnumerator PlayCutscene(int planetIndex)
     {
         isMoving = true;
+        isPanoramicMode = false;
+        
         PlanetCutscene planet = planets[planetIndex];
-
-        // Reativa a rotação do planeta anterior (se houver)
-        if (currentPlanetIndex > 0)
-        {
-            PlanetCutscene previousPlanet = planets[currentPlanetIndex - 1];
-            RestartPlanetRotation(previousPlanet.targetPosition);
-        }
 
         if (planet.targetPosition != null)
         {
-            yield return StartCoroutine(MoveCameraToTarget(planet.targetPosition, planet.lookAtOffset, planet.moveDuration));
+            Vector3 targetPos = planet.targetPosition.position + planet.cameraOffset;
+            yield return StartCoroutine(MoveCameraToPosition(targetPos, planet.targetPosition.position, planet.moveDuration));
         }
 
         isMoving = false;
         DisplayPlanetInfo(planetIndex);
     }
 
-    IEnumerator MoveCameraToTarget(Transform target, Vector3 lookAtOffset, float duration)
+    IEnumerator GoToPanoramicView()
+    {
+        isMoving = true;
+        isPanoramicMode = false;
+
+        Debug.Log("Vista Panorâmica! Apreciando todo o sistema solar...");
+        
+        yield return StartCoroutine(MoveCameraToPosition(panoramicViewPosition, panoramicLookAtPosition, 4f));
+
+        isMoving = false;
+        isPanoramicMode = true; // Ativa a rotação automática
+    }
+
+    IEnumerator MoveCameraToPosition(Vector3 targetPos, Vector3 lookAtPos, float duration)
     {
         float elapsedTime = 0f;
         Vector3 startPos = mainCamera.position;
-        Vector3 targetPos = target.position + lookAtOffset;
+        Quaternion startRot = mainCamera.rotation;
 
         while (elapsedTime < duration)
         {
             elapsedTime += Time.deltaTime;
-            float t = elapsedTime / duration;
+            float t = EaseInOutCubic(elapsedTime / duration);
 
-            mainCamera.position = Vector3.Lerp(startPos, targetPos, EaseInOutCubic(t));
-            mainCamera.LookAt(target.position);
+            mainCamera.position = Vector3.Lerp(startPos, targetPos, t);
+            
+            // Faz a câmera olhar suavemente para o alvo
+            Quaternion targetRot = Quaternion.LookRotation(lookAtPos - mainCamera.position);
+            mainCamera.rotation = Quaternion.Slerp(startRot, targetRot, t);
 
             yield return null;
         }
 
         mainCamera.position = targetPos;
-        mainCamera.LookAt(target.position);
+        mainCamera.LookAt(lookAtPos);
     }
 
     void DisplayPlanetInfo(int planetIndex)
     {
         PlanetCutscene planet = planets[planetIndex];
-        
-        // Para a rotação do planeta
-        StopPlanetRotation(planet.targetPosition);
-        
-        Debug.Log($"Planeta: {planet.planetName}\n{planet.description}");
+        Debug.Log($"Planeta {planetIndex + 1}/{planets.Count}: {planet.planetName}\n{planet.description}");
     }
 
-    void StopPlanetRotation(Transform planetTransform)
+    void DisableAllPlanetMovements()
     {
-        if (planetTransform == null)
-            return;
-
-        // Desativa o script Rotate do planeta
-        Rotate rotateScript = planetTransform.GetComponent<Rotate>();
-        if (rotateScript != null)
+        // Desativa TODOS os scripts Rotate e Orbit na cena
+        Rotate[] allRotateScripts = FindObjectsOfType<Rotate>();
+        foreach (Rotate rotate in allRotateScripts)
         {
-            rotateScript.enabled = false;
+            rotate.enabled = false;
         }
 
-        // Também desativa scripts de órbita dos filhos
-        Orbit orbitScript = planetTransform.GetComponent<Orbit>();
-        if (orbitScript != null)
+        Orbit[] allOrbitScripts = FindObjectsOfType<Orbit>();
+        foreach (Orbit orbit in allOrbitScripts)
         {
-            orbitScript.enabled = false;
+            orbit.enabled = false;
         }
 
-        // Desativa rotação de filhos também
-        foreach (Transform child in planetTransform)
-        {
-            Rotate childRotate = child.GetComponent<Rotate>();
-            if (childRotate != null)
-                childRotate.enabled = false;
-
-            Orbit childOrbit = child.GetComponent<Orbit>();
-            if (childOrbit != null)
-                childOrbit.enabled = false;
-        }
-    }
-
-    void RestartPlanetRotation(Transform planetTransform)
-    {
-        if (planetTransform == null)
-            return;
-
-        // Reativa o script Rotate do planeta
-        Rotate rotateScript = planetTransform.GetComponent<Rotate>();
-        if (rotateScript != null)
-        {
-            rotateScript.enabled = true;
-        }
-
-        // Também reativa scripts de órbita dos filhos
-        Orbit orbitScript = planetTransform.GetComponent<Orbit>();
-        if (orbitScript != null)
-        {
-            orbitScript.enabled = true;
-        }
-
-        // Reativa rotação de filhos também
-        foreach (Transform child in planetTransform)
-        {
-            Rotate childRotate = child.GetComponent<Rotate>();
-            if (childRotate != null)
-                childRotate.enabled = true;
-
-            Orbit childOrbit = child.GetComponent<Orbit>();
-            if (childOrbit != null)
-                childOrbit.enabled = true;
-        }
+        Debug.Log($"Desativados {allRotateScripts.Length} scripts Rotate e {allOrbitScripts.Length} scripts Orbit");
     }
 
     public int GetCurrentPlanetIndex()
     {
         return currentPlanetIndex;
+    }
+
+    public bool IsInPanoramicMode()
+    {
+        return isPanoramicMode;
     }
 
     float EaseInOutCubic(float t)
