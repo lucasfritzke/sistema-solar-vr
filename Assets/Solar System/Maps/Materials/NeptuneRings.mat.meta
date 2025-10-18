@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 66eae347b30c4fc418dd4ec22415c0af
+timeCreated: 1470086166
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 2178
+  packageName: The Solar System
+  packageVersion: 2.0
+  assetPath: Assets/Solar System/Maps/Materials/NeptuneRings.mat
+  uploadId: 130049

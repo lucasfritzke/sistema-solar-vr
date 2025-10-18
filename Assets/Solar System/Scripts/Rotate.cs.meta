@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: d095319cbfc4c7942b7b2b1d0901b4fd
+timeCreated: 1470070991
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 2178
+  packageName: The Solar System
+  packageVersion: 2.0
+  assetPath: Assets/Solar System/Scripts/Rotate.cs
+  uploadId: 130049

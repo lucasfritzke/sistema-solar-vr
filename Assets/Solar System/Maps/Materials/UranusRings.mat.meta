@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 20c4f6bbd538220488665e89164f143a
+timeCreated: 1470085849
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 2178
+  packageName: The Solar System
+  packageVersion: 2.0
+  assetPath: Assets/Solar System/Maps/Materials/UranusRings.mat
+  uploadId: 130049

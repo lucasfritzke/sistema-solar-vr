@@ -3,12 +3,15 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - CenterButton
+  - TourButton
+  - Selectable
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Selectable
   - Water
   - UI
   - Interativa

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Jobs;
 using UnityEngine.UI;
 
 public class GazeSelectorUI : MonoBehaviour
@@ -7,7 +8,7 @@ public class GazeSelectorUI : MonoBehaviour
     private float gazeTimer;
     private GameObject gazedObject;
 
-    public Image reticleFill;  // círculo de carregamento
+    public Image reticleFill;  // cï¿½rculo de carregamento
     public Image reticlePoint; // ponto fixo no centro
 
     void Start()
@@ -19,13 +20,14 @@ public class GazeSelectorUI : MonoBehaviour
     void Update()
     {
         Ray ray = new Ray(transform.position, transform.forward);
+        Debug.DrawRay(transform.position, transform.forward * 100, Color.red);
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit))
         {
             GameObject hitObject = hit.collider.gameObject;
 
-            // Só ativa o reticle de carregamento se o objeto for interativo
+            // Sï¿½ ativa o reticle de carregamento se o objeto for interativo
             if (hitObject.CompareTag("Selectable"))
             {
                 if (gazedObject != hitObject)
@@ -54,7 +56,7 @@ public class GazeSelectorUI : MonoBehaviour
                     }
                 }
 
-                // Mostra o círculo e o ponto
+                // Mostra o cï¿½rculo e o ponto
                 if (reticleFill != null) reticleFill.enabled = true;
                 if (reticlePoint != null) reticlePoint.enabled = true;
             }
@@ -82,12 +84,12 @@ public class GazeSelectorUI : MonoBehaviour
         if (reticleFill != null)
         {
             reticleFill.fillAmount = 0;
-            reticleFill.enabled = false; // esconde o círculo quando não está olhando para nada interativo
+            reticleFill.enabled = false; // esconde o cï¿½rculo quando nï¿½o estï¿½ olhando para nada interativo
         }
 
         if (reticlePoint != null)
         {
-            reticlePoint.enabled = true; // o ponto sempre visível
+            reticlePoint.enabled = true; // o ponto sempre visï¿½vel
         }
     }
 }
