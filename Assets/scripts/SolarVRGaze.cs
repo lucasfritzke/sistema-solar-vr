@@ -18,49 +18,41 @@ public class SolarVRGaze : MonoBehaviour
     private GameObject currentGazedObject;
     private Button currentButton;
 
-    private Camera mainCam;
-
     void Start()
-{
-    mainCam = Camera.main;
-    if (mainCam == null)
     {
-        mainCam = FindObjectOfType<Camera>();
-        Debug.LogWarning("⚠️ Nenhuma Camera.main encontrada — usando primeira câmera disponível.");
+        // Inicializa o reticle
+        if (reticleFill != null)
+        {
+            reticleFill.fillAmount = 0f;
+            reticleFill.enabled = false;
+        }
+
+        if (reticlePoint != null)
+        {
+            reticlePoint.enabled = true;
+            reticlePoint.color = normalColor;
+        }
+
+        Debug.Log("✓ SolarVRGaze iniciado!");
     }
-
-    if (reticleFill != null)
-    {
-        reticleFill.fillAmount = 0f;
-        reticleFill.enabled = false;
-    }
-
-    if (reticlePoint != null)
-    {
-        reticlePoint.enabled = true;
-        reticlePoint.color = normalColor;
-    }
-
-    Debug.Log("✓ SolarVRGaze iniciado!");
-}
-
 
     void Update()
     {
         // Raycast do centro da câmera
-        if (mainCam == null) return;
-        Ray ray = new Ray(mainCam.transform.position, mainCam.transform.forward);
-
+        Ray ray = new Ray(transform.position, transform.forward);
         RaycastHit hit;
 
         // Debug visual (linha vermelha)
-        Debug.DrawRay(transform.position, transform.forward * 10f, Color.red);
+        Debug.DrawRay(transform.position, transform.forward * raycastDistance, Color.red);
 
-        if (Physics.Raycast(ray, out hit, raycastDistance, interactionLayers))
+        bool hitSomething = Physics.Raycast(ray, out hit, raycastDistance, interactionLayers);
+
+        if (hitSomething)
         {
             GameObject hitObject = hit.collider.gameObject;
             
-            Debug.Log($"Raycast HIT: {hitObject.name} | Tag: {hitObject.tag}");
+            // Log mais detalhado
+            Debug.Log($"[RAYCAST] HIT: {hitObject.name} | Tag: {hitObject.tag} | Layer: {LayerMask.LayerToName(hitObject.layer)} | Distance: {hit.distance:F2}m");
 
             // Verifica se é um objeto selecionável
             if (hitObject.CompareTag("Selectable"))
@@ -75,12 +67,18 @@ public class SolarVRGaze : MonoBehaviour
                     // Notifica o objeto (se tiver SelectableObject)
                     hitObject.SendMessage("OnGazeEnter", SendMessageOptions.DontRequireReceiver);
                     
-                    Debug.Log($"→ Olhando para: {hitObject.name}");
+                    Debug.Log($"[GAZE] Novo alvo: {hitObject.name}");
                 }
                 else
                 {
                     // Continua olhando para o mesmo objeto
                     gazeTimer += Time.deltaTime;
+                    
+                    // Log a cada 0.5s
+                    if (gazeTimer % 0.5f < Time.deltaTime)
+                    {
+                        Debug.Log($"[GAZE] Timer: {gazeTimer:F1}s / {gazeTime}s");
+                    }
                     
                     // Atualiza o círculo de progresso
                     if (reticleFill != null)
@@ -109,6 +107,7 @@ public class SolarVRGaze : MonoBehaviour
             else
             {
                 // Hit em algo não selecionável
+                Debug.Log($"[RAYCAST] Hit objeto SEM tag 'Selectable': {hitObject.name}");
                 ResetGaze();
             }
         }
@@ -121,15 +120,13 @@ public class SolarVRGaze : MonoBehaviour
         // Também detecta toque/clique direto (backup)
         if (Input.GetMouseButtonDown(0) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
         {
+            Debug.Log("[INPUT] Toque/clique detectado!");
             if (currentGazedObject != null && currentButton != null)
             {
                 ExecuteGazeAction(currentGazedObject);
                 ResetGaze();
             }
         }
-
-        if (mainCam != null)
-        Debug.DrawRay(mainCam.transform.position, mainCam.transform.forward * 5f, Color.red);
     }
 
     void ExecuteGazeAction(GameObject target)
