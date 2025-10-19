@@ -23,19 +23,34 @@ public class SolarSystemManager : MonoBehaviour
     private int currentPlanetIndex = 0;
     private bool isMoving = false;
     private bool isPanoramicMode = false;
-    
+    private Transform cameraRig;
+
     private Transform mainCamera;
 
     void Start()
+{
+    // Tenta encontrar a câmera principal mesmo em XR
+    Camera cam = Camera.main;
+    if (cam == null)
     {
-        mainCamera = Camera.main.transform;
-        
-        // Desativa TODOS os scripts de movimento/rotação no início
-        DisableAllPlanetMovements();
-        
-        if (planets.Count > 0)
-            StartCoroutine(PlayCutscene(0));
+        cam = FindObjectOfType<Camera>();
+        Debug.LogWarning("⚠️ Nenhuma Camera.main encontrada — usando primeira câmera disponível.");
     }
+
+    mainCamera = cam != null ? cam.transform : null;
+
+    if (mainCamera == null)
+    {
+        Debug.LogError("❌ Nenhuma câmera foi encontrada! A movimentação não funcionará.");
+        return;
+    }
+
+    DisableAllPlanetMovements();
+
+    if (planets.Count > 0)
+        StartCoroutine(PlayCutscene(0));
+}
+
 
     void Update()
     {
