@@ -12,6 +12,15 @@ public class SolarSystemManager : MonoBehaviour
         public Vector3 cameraOffset = new Vector3(0, 5, -10);
         public float moveDuration = 3f;
         public string description;
+        public List<PlanetQuestion> questions;
+    }
+
+    [System.Serializable]
+    public class PlanetQuestion
+    {
+        public string question;
+        public List<string> alternatives;
+        public int corretAnswer;
     }
 
     [Header("Configurações")]
