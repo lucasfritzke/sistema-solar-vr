@@ -1,195 +1,121 @@
-using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class SolarSystemManager : MonoBehaviour
 {
     [System.Serializable]
+    public class QuestionData
+    {
+        [TextArea(1, 3)]
+        public string question;
+        public string[] alternatives;   // alternativas (ex: 4 alternativas)
+        public int corretAnswer;        // índice da alternativa correta (0-based)
+    }
+
+    [System.Serializable]
     public class PlanetCutscene
     {
         public string planetName;
-        public Transform targetPosition;
-        public Vector3 cameraOffset = new Vector3(0, 5, -10);
-        public float moveDuration = 3f;
-        public string description;
+        [Tooltip("Referência ao GameObject do planeta na cena (opcional)")]
+        public GameObject planetObject;
+        [Tooltip("Audio clip explicativo (opcional). Se vazio, o quiz aparece imediatamente.")]
+        public AudioClip planetAudio;
+        public List<QuestionData> questions = new List<QuestionData>();
     }
 
-    [Header("Configurações")]
+    [Header("Planetas")]
     public List<PlanetCutscene> planets = new List<PlanetCutscene>();
-    public Vector3 panoramicViewPosition = new Vector3(0, 100, -200);
-    public Vector3 panoramicLookAtPosition = Vector3.zero;
-    public float panoramicRotationSpeed = 10f;
+
+    [Header("Referências")]
+    [Tooltip("AudioSource usado para tocar as descrições (opcional). Se vazio, não toca áudio.")]
+    public AudioSource audioSource;
+
+    [Tooltip("Script UI que mostrará nome/quiz (deve ter método ShowPlanetUI(PlanetCutscene) e ShowPlanetQuiz(PlanetCutscene)")]
+    public SolarVRSimpleUI ui;
 
     private int currentPlanetIndex = 0;
-    private bool isMoving = false;
-    private bool isPanoramicMode = false;
-
-    private Transform cameraRig;     // XR Origin
-    private Transform mainCamera;    // Câmera real dentro do XR Origin
 
     void Start()
     {
-        // Tenta encontrar a câmera principal
-        mainCamera = Camera.main?.transform;
-        
-        // Se não encontrar, procura por XR Camera
-        if (mainCamera == null)
+        if (ui == null)
+            ui = FindObjectOfType<SolarVRSimpleUI>();
+
+        if (planets == null || planets.Count == 0)
         {
-            GameObject xrOrigin = GameObject.Find("XR Origin");
-            if (xrOrigin != null)
-            {
-                cameraRig = xrOrigin.transform;
-                Transform xrCamera = xrOrigin.transform.Find("Main Camera");
-                if (xrCamera != null)
-                    mainCamera = xrCamera;
-            }
-        }
-        else
-        {
-            // Se encontrou a Main Camera, pega o pai (XR Origin)
-            if (mainCamera.parent != null)
-                cameraRig = mainCamera.parent;
-            else
-                cameraRig = mainCamera;
-        }
-        
-        if (mainCamera == null)
-        {
-            Debug.LogError("❌ Câmera não encontrada!");
+            Debug.LogWarning("SolarSystemManager: nenhum planeta configurado na lista 'planets'.");
             return;
         }
-        
-        if (cameraRig == null)
-        {
-            Debug.LogWarning("⚠️ XR Origin não encontrado! Usando câmera.");
-            cameraRig = mainCamera;
-        }
-        
-        Debug.Log($"✓ Câmera: {mainCamera.name}");
-        Debug.Log($"✓ Rig: {cameraRig.name}");
-        
-        DisableAllPlanetMovements();
-        
-        if (planets.Count > 0)
-            StartCoroutine(PlayCutscene(0));
-        else
-            Debug.LogError("❌ Lista de planetas vazia!");
+
+        // Inicia exibindo o primeiro planeta (ajuste se quiser outro comportamento)
+        ShowCurrentPlanet();
     }
 
-    void Update()
+    // Exibe o planeta atual: ativa objeto, atualiza UI e dispara áudio/quiz
+    public void ShowCurrentPlanet()
     {
-        if (isPanoramicMode && cameraRig != null)
+        if (currentPlanetIndex < 0 || currentPlanetIndex >= planets.Count)
         {
-            cameraRig.RotateAround(panoramicLookAtPosition, Vector3.up, panoramicRotationSpeed * Time.deltaTime);
-            cameraRig.LookAt(panoramicLookAtPosition);
+            Debug.Log("SolarSystemManager: índice de planeta fora do intervalo.");
+            return;
+        }
+
+        PlanetCutscene p = planets[currentPlanetIndex];
+        Debug.Log($"[SolarSystemManager] Show planet #{currentPlanetIndex}: {p.planetName}");
+
+        // Ativa somente o planeta atual (se você usa essa abordagem)
+        for (int i = 0; i < planets.Count; i++)
+        {
+            if (planets[i].planetObject != null)
+                planets[i].planetObject.SetActive(i == currentPlanetIndex);
+        }
+
+        // Atualiza o UI com nome/descrição (método da sua UI)
+        if (ui != null)
+            ui.ShowPlanetUI(p);
+
+        // Se há áudio e há um AudioSource configurado, toca e quando terminar chama ShowPlanetQuiz
+        if (p.planetAudio != null && audioSource != null)
+        {
+            audioSource.Stop();
+            audioSource.clip = p.planetAudio;
+            audioSource.Play();
+            StartCoroutine(WaitForAudioThenShowQuiz(p, p.planetAudio.length));
+        }
+        else
+        {
+            // Se não há áudio, mostra o quiz imediatamente (útil para testes)
+            Debug.Log("[SolarSystemManager] Sem áudio: liberando quiz imediatamente para teste.");
+            if (ui != null)
+                ui.ShowPlanetQuiz(p);
         }
     }
 
+    private IEnumerator WaitForAudioThenShowQuiz(PlanetCutscene p, float length)
+    {
+        // espera o tempo do áudio (caso audioSource.isPlaying seja falso, ainda assim aguardamos o length)
+        yield return new WaitForSeconds(length);
+        if (ui != null)
+        {
+            ui.ShowPlanetQuiz(p);
+        }
+    }
+
+    // Chamado pela UI quando terminar o fluxo do planeta e for para o próximo
     public void NextPlanet()
     {
-        if (isMoving) return;
-
         currentPlanetIndex++;
-
-        if (currentPlanetIndex < planets.Count)
-            StartCoroutine(PlayCutscene(currentPlanetIndex));
-        else
-            StartCoroutine(GoToPanoramicView());
-    }
-
-    IEnumerator PlayCutscene(int planetIndex)
-    {
-        isMoving = true;
-        isPanoramicMode = false;
-
-        PlanetCutscene planet = planets[planetIndex];
-
-        if (planet.targetPosition != null)
+        if (currentPlanetIndex >= planets.Count)
         {
-            Vector3 targetPos = planet.targetPosition.position + planet.cameraOffset;
-            yield return StartCoroutine(MoveCameraToPosition(targetPos, planet.targetPosition.position, planet.moveDuration));
+            Debug.Log("[SolarSystemManager] Todos os planetas concluídos. Você pode implementar o modo panorâmico aqui.");
+            // Aqui você pode implementar comportamento de final (panoramic mode etc.)
+            return;
         }
 
-        isMoving = false;
-        DisplayPlanetInfo(planetIndex);
+        ShowCurrentPlanet();
     }
 
-    IEnumerator GoToPanoramicView()
-    {
-        isMoving = true;
-        isPanoramicMode = false;
-
-        Debug.Log("🌌 Vista panorâmica...");
-
-        yield return StartCoroutine(MoveCameraToPosition(panoramicViewPosition, panoramicLookAtPosition, 4f));
-
-        isMoving = false;
-        isPanoramicMode = true;
-    }
-
-    IEnumerator MoveCameraToPosition(Vector3 targetPos, Vector3 lookAtPos, float duration)
-    {
-        if (cameraRig == null)
-        {
-            Debug.LogError("❌ Camera rig é null!");
-            yield break;
-        }
-
-        float elapsedTime = 0f;
-        Vector3 startPos = cameraRig.position;
-        Quaternion startRot = cameraRig.rotation;
-
-        Debug.Log($"📹 Movendo de {startPos} para {targetPos}");
-
-        while (elapsedTime < duration)
-        {
-            elapsedTime += Time.deltaTime;
-            float t = EaseInOutCubic(elapsedTime / duration);
-
-            cameraRig.position = Vector3.Lerp(startPos, targetPos, t);
-
-            Vector3 direction = lookAtPos - cameraRig.position;
-            if (direction != Vector3.zero)
-            {
-                Quaternion targetRot = Quaternion.LookRotation(direction);
-                cameraRig.rotation = Quaternion.Slerp(startRot, targetRot, t);
-            }
-
-            yield return null;
-        }
-
-        cameraRig.position = targetPos;
-        Vector3 finalDirection = lookAtPos - cameraRig.position;
-        if (finalDirection != Vector3.zero)
-            cameraRig.rotation = Quaternion.LookRotation(finalDirection);
-
-        Debug.Log($"✓ Câmera chegou em {targetPos}");
-    }
-
-    void DisplayPlanetInfo(int planetIndex)
-    {
-        PlanetCutscene planet = planets[planetIndex];
-        Debug.Log($"🪐 {planet.planetName}: {planet.description}");
-    }
-
-    void DisableAllPlanetMovements()
-    {
-        Rotate[] allRotateScripts = FindObjectsOfType<Rotate>();
-        foreach (Rotate rotate in allRotateScripts)
-            rotate.enabled = false;
-
-        Orbit[] allOrbitScripts = FindObjectsOfType<Orbit>();
-        foreach (Orbit orbit in allOrbitScripts)
-            orbit.enabled = false;
-
-        Debug.Log($"🚫 Desativados {allRotateScripts.Length} Rotate e {allOrbitScripts.Length} Orbit");
-    }
-
+    // UTILIDADES
     public int GetCurrentPlanetIndex() => currentPlanetIndex;
-    public bool IsInPanoramicMode() => isPanoramicMode;
-
-    float EaseInOutCubic(float t)
-    {
-        return t < 0.5f ? 4f * t * t * t : 1f - Mathf.Pow(-2f * t + 2f, 3f) / 2f;
-    }
+    public PlanetCutscene GetCurrentPlanet() => (currentPlanetIndex >= 0 && currentPlanetIndex < planets.Count) ? planets[currentPlanetIndex] : null;
 }

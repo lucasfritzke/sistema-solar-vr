@@ -1,110 +1,201 @@
-using UnityEngine;
-using TMPro;
+﻿using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
+using System.Collections;
+using System.Linq;
 
 public class SolarVRSimpleUI : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI planetNameText;
-    [SerializeField] private TextMeshProUGUI descriptionText;
-    [SerializeField] private Button nextButton;
+    [Header("Painel de informações do planeta")]
     [SerializeField] private CanvasGroup infoPanel;
+    [SerializeField] private TextMeshProUGUI planetNameText;
+
+    [Header("Painel de perguntas")]
+    [SerializeField] private CanvasGroup questionPanel;
+    [SerializeField] private TextMeshProUGUI questionTitleText;
+    [SerializeField] private TextMeshProUGUI questionDescriptionText;
+    [SerializeField] private ToggleGroup toggleGroup;
+    [SerializeField] private Button validateButton;
 
     private SolarSystemManager solarSystemManager;
+    private SolarSystemManager.PlanetCutscene currentPlanet;
+    private int currentQuestionIndex = 0;
 
     void Start()
     {
-        solarSystemManager = GetComponent<SolarSystemManager>();
+        solarSystemManager = FindObjectOfType<SolarSystemManager>();
 
-        // Se nextButton não foi atribuído, tenta encontrar automaticamente
-        if (nextButton == null)
-        {
-            nextButton = FindObjectOfType<Button>();
-            Debug.Log(nextButton != null ? "✓ Botão encontrado automaticamente" : "✗ Botão não encontrado");
-        }
+        // Inicialmente esconde os painéis
+        SetCanvasGroupVisible(infoPanel, false);
+        SetCanvasGroupVisible(questionPanel, false);
 
-        if (nextButton != null)
-        {
-            nextButton.onClick.AddListener(() => GoToNextPlanet());
-            Debug.Log("✓ Listener do botão adicionado");
-        }
+        if (validateButton != null)
+            validateButton.onClick.AddListener(ValidateAnswer);
+    }
 
-        if (infoPanel == null)
+    // =====================================================================
+    // Exibe apenas o nome do planeta (enquanto toca o áudio)
+    // =====================================================================
+    public void ShowPlanetUI(SolarSystemManager.PlanetCutscene planet)
+    {
+        currentPlanet = planet;
+        currentQuestionIndex = 0;
+
+        if (planetNameText != null)
+            planetNameText.text = planet.planetName;
+
+        StartCoroutine(FadeIn(infoPanel));
+        SetCanvasGroupVisible(questionPanel, false);
+    }
+
+    // =====================================================================
+    // Chamado pelo manager após o áudio terminar
+    // =====================================================================
+    public void ShowPlanetQuiz(SolarSystemManager.PlanetCutscene planet)
+    {
+        currentPlanet = planet;
+        currentQuestionIndex = 0;
+
+        if (currentPlanet.questions == null || currentPlanet.questions.Count == 0)
         {
-            Debug.LogError("✗ InfoPanel não foi atribuído!");
+            Debug.LogWarning($"[SolarVRSimpleUI] Nenhuma pergunta configurada para {currentPlanet.planetName}!");
             return;
         }
 
-        Invoke("ShowCurrentPlanetInfo", 3.5f);
+        ShowQuestion(currentQuestionIndex);
     }
 
-    void GoToNextPlanet()
+    // =====================================================================
+    // Mostra a pergunta atual
+    // =====================================================================
+    private void ShowQuestion(int index)
     {
-        StartCoroutine(FadeOut());
-    }
-
-    void ShowCurrentPlanetInfo()
-    {
-        if (solarSystemManager.planets.Count == 0)
+        if (currentPlanet == null || currentPlanet.questions.Count <= index)
             return;
 
-        // Se estiver no modo panorâmico, mostra mensagem especial
-        if (solarSystemManager.IsInPanoramicMode())
+        var q = currentPlanet.questions[index];
+        questionTitleText.text = $"Pergunta {index + 1}";
+        questionDescriptionText.text = q.question;
+
+        // Limpa os toggles antigos
+        foreach (Transform child in toggleGroup.transform)
+            Destroy(child.gameObject);
+
+        // Cria novos toggles para cada alternativa
+        foreach (var alt in q.alternatives)
         {
-            planetNameText.text = "SISTEMA SOLAR";
-            descriptionText.text = "Você completou a jornada pelos planetas!\nApreciando a vista panorâmica...";
-            
-            // Esconde o botão no modo panorâmico
-            if (nextButton != null)
-                nextButton.gameObject.SetActive(false);
-            
-            StartCoroutine(FadeIn());
+            GameObject toggleObj = new GameObject("OptionToggle", typeof(RectTransform), typeof(Toggle), typeof(TextMeshProUGUI));
+            toggleObj.transform.SetParent(toggleGroup.transform, false);
+
+            Toggle toggle = toggleObj.GetComponent<Toggle>();
+            toggle.group = toggleGroup;
+            toggle.isOn = false;
+
+            TextMeshProUGUI label = toggleObj.GetComponent<TextMeshProUGUI>();
+            label.text = alt;
+            label.fontSize = 24;
+            label.color = Color.white;
+
+            // Ajusta layout
+            RectTransform rt = toggleObj.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(800, 40);
+        }
+
+        // Mostra o painel de perguntas
+        StartCoroutine(FadeIn(questionPanel));
+    }
+
+    // =====================================================================
+    // Quando o jogador clica em "Validar"
+    // =====================================================================
+    private void ValidateAnswer()
+    {
+        Toggle selected = toggleGroup.ActiveToggles().FirstOrDefault();
+        if (selected == null)
+        {
+            Debug.Log("Nenhuma opção selecionada.");
             return;
         }
 
-        int index = solarSystemManager.GetCurrentPlanetIndex();
-        SolarSystemManager.PlanetCutscene planet = solarSystemManager.planets[index];
+        int selectedIndex = selected.transform.GetSiblingIndex();
+        bool correct = (selectedIndex == currentPlanet.questions[currentQuestionIndex].corretAnswer);
 
-        planetNameText.text = planet.planetName;
-        descriptionText.text = planet.description;
+        if (correct)
+        {
+            Debug.Log($"[Quiz] ✅ Resposta correta para {currentPlanet.planetName} / Pergunta {currentQuestionIndex + 1}");
 
-        // Mostra o botão se não estiver no modo panorâmico
-        if (nextButton != null)
-            nextButton.gameObject.SetActive(true);
-
-        StartCoroutine(FadeIn());
+            StartCoroutine(HandleCorrectAnswer());
+        }
+        else
+        {
+            Debug.Log($"[Quiz] ❌ Resposta incorreta para {currentPlanet.planetName}");
+        }
     }
 
-    System.Collections.IEnumerator FadeIn()
+    private IEnumerator HandleCorrectAnswer()
     {
-        float duration = 1f;
-        float elapsedTime = 0f;
+        yield return new WaitForSeconds(1f);
 
-        while (elapsedTime < duration)
+        currentQuestionIndex++;
+
+        if (currentQuestionIndex < currentPlanet.questions.Count)
         {
-            elapsedTime += Time.deltaTime;
-            infoPanel.alpha = Mathf.Lerp(0, 1, elapsedTime / duration);
+            // Próxima pergunta
+            StartCoroutine(FadeOut(questionPanel, () =>
+            {
+                ShowQuestion(currentQuestionIndex);
+            }));
+        }
+        else
+        {
+            // Todas as perguntas concluídas -> próximo planeta
+            Debug.Log($"[Quiz] ✅ Todas perguntas concluídas para {currentPlanet.planetName}");
+            StartCoroutine(FadeOut(questionPanel, () =>
+            {
+                solarSystemManager.NextPlanet();
+            }));
+        }
+    }
+
+    // =====================================================================
+    // Utilitários de fade e visibilidade
+    // =====================================================================
+    private void SetCanvasGroupVisible(CanvasGroup cg, bool visible)
+    {
+        if (cg == null) return;
+        cg.alpha = visible ? 1f : 0f;
+        cg.interactable = visible;
+        cg.blocksRaycasts = visible;
+    }
+
+    private IEnumerator FadeIn(CanvasGroup cg, float duration = 1f)
+    {
+        if (cg == null) yield break;
+        cg.gameObject.SetActive(true);
+        cg.blocksRaycasts = true;
+        float t = 0f;
+        while (t < duration)
+        {
+            cg.alpha = Mathf.Lerp(0, 1, t / duration);
+            t += Time.deltaTime;
             yield return null;
         }
-
-        infoPanel.alpha = 1;
+        cg.alpha = 1;
     }
 
-    System.Collections.IEnumerator FadeOut()
+    private IEnumerator FadeOut(CanvasGroup cg, System.Action onComplete = null, float duration = 0.5f)
     {
-        float duration = 0.5f;
-        float elapsedTime = 0f;
-
-        while (elapsedTime < duration)
+        if (cg == null) yield break;
+        float t = 0f;
+        while (t < duration)
         {
-            elapsedTime += Time.deltaTime;
-            infoPanel.alpha = Mathf.Lerp(1, 0, elapsedTime / duration);
+            cg.alpha = Mathf.Lerp(1, 0, t / duration);
+            t += Time.deltaTime;
             yield return null;
         }
-
-        infoPanel.alpha = 0;
-
-        solarSystemManager.NextPlanet();
-
-        Invoke("ShowCurrentPlanetInfo", 3.5f);
+        cg.alpha = 0;
+        cg.blocksRaycasts = false;
+        cg.gameObject.SetActive(false);
+        onComplete?.Invoke();
     }
 }
