@@ -7,11 +7,9 @@ public class SolarSystemManager : MonoBehaviour
     [System.Serializable]
     public class PlanetCutscene
     {
-        public string planetName;
         public Transform targetPosition;
         public Vector3 cameraOffset = new Vector3(0, 5, -10);
         public float moveDuration = 3f;
-        public string description;
         public List<PlanetQuestion> questions;
     }
 
@@ -178,7 +176,6 @@ public class SolarSystemManager : MonoBehaviour
     void DisplayPlanetInfo(int planetIndex)
     {
         PlanetCutscene planet = planets[planetIndex];
-        Debug.Log($"🪐 {planet.planetName}: {planet.description}");
     }
 
     void DisableAllPlanetMovements()

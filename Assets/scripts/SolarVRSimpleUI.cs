@@ -6,10 +6,7 @@ using System.Linq;
 
 public class SolarVRSimpleUI : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI planetNameText;
-    [SerializeField] private TextMeshProUGUI descriptionText;
     [SerializeField] private Button nextButton;
-    [SerializeField] private CanvasGroup infoPanel;
 
     [SerializeField] private TextMeshProUGUI questionTittle;
     [SerializeField] private TextMeshProUGUI questionDescription;
@@ -36,12 +33,6 @@ public class SolarVRSimpleUI : MonoBehaviour
         {
             nextButton.onClick.AddListener(() => GoToNextPlanet());
             Debug.Log("✓ Listener do botão adicionado");
-        }
-
-        if (infoPanel == null)
-        {
-            Debug.LogError("✗ InfoPanel não foi atribuído!");
-            return;
         }
 
         if (validateButton != null)
@@ -99,9 +90,6 @@ public class SolarVRSimpleUI : MonoBehaviour
         // Se estiver no modo panorâmico, mostra mensagem especial
         if (solarSystemManager.IsInPanoramicMode())
         {
-            planetNameText.text = "SISTEMA SOLAR";
-            descriptionText.text = "Você completou a jornada pelos planetas!\nApreciando a vista panorâmica...";
-
             // Esconde o botão no modo panorâmico
             if (nextButton != null)
                 nextButton.gameObject.SetActive(false);
@@ -112,8 +100,6 @@ public class SolarVRSimpleUI : MonoBehaviour
 
         SolarSystemManager.PlanetCutscene planet = CurrentPlanet();
 
-        planetNameText.text = planet.planetName;
-        descriptionText.text = planet.description;
         SetQuestion(planet);
 
         // Mostra o botão se não estiver no modo panorâmico
@@ -155,12 +141,10 @@ public class SolarVRSimpleUI : MonoBehaviour
         while (elapsedTime < duration)
         {
             elapsedTime += Time.deltaTime;
-            infoPanel.alpha = Mathf.Lerp(0, 1, elapsedTime / duration);
             questionPanel.alpha = Mathf.Lerp(0, 1, elapsedTime / duration);
             yield return null;
         }
 
-        infoPanel.alpha = 1;
         questionPanel.alpha = 1;
     }
 
@@ -172,12 +156,10 @@ public class SolarVRSimpleUI : MonoBehaviour
         while (elapsedTime < duration)
         {
             elapsedTime += Time.deltaTime;
-            infoPanel.alpha = Mathf.Lerp(1, 0, elapsedTime / duration);
             questionPanel.alpha = Mathf.Lerp(1, 0, elapsedTime / duration);
             yield return null;
         }
 
-        infoPanel.alpha = 0;
         questionPanel.alpha = 0;
 
         solarSystemManager.NextPlanet();

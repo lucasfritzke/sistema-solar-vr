@@ -5,7 +5,7 @@ public class SolarVRGaze : MonoBehaviour
 {
     [Header("Configurações do Gaze")]
     public float gazeTime = 2f;
-    public LayerMask interactionLayers = -1; // Todas as layers por padrão
+    public LayerMask interactionLayers = -1;
     public float raycastDistance = 100f;
 
     [Header("Reticle UI")]
@@ -17,10 +17,10 @@ public class SolarVRGaze : MonoBehaviour
     private float gazeTimer = 0f;
     private GameObject currentGazedObject;
     private Button currentButton;
+    private bool gazeCompleted = false;
 
     void Start()
     {
-        // Inicializa o reticle
         if (reticleFill != null)
         {
             reticleFill.fillAmount = 0f;
@@ -38,11 +38,9 @@ public class SolarVRGaze : MonoBehaviour
 
     void Update()
     {
-        // Raycast do centro da câmera
         Ray ray = new Ray(transform.position, transform.forward);
         RaycastHit hit;
 
-        // Debug visual (linha vermelha)
         Debug.DrawRay(transform.position, transform.forward * raycastDistance, Color.red);
 
         bool hitSomething = Physics.Raycast(ray, out hit, raycastDistance, interactionLayers);
@@ -50,78 +48,56 @@ public class SolarVRGaze : MonoBehaviour
         if (hitSomething)
         {
             GameObject hitObject = hit.collider.gameObject;
-            
-            // Log mais detalhado
-            Debug.Log($"[RAYCAST] HIT: {hitObject.name} | Tag: {hitObject.tag} | Layer: {LayerMask.LayerToName(hitObject.layer)} | Distance: {hit.distance:F2}m");
 
-            // Verifica se é um objeto selecionável
             if (hitObject.CompareTag("Selectable"))
             {
-                // Novo objeto detectado
                 if (currentGazedObject != hitObject)
                 {
                     ResetGaze();
                     currentGazedObject = hitObject;
                     currentButton = hitObject.GetComponent<Button>();
-                    
-                    // Notifica o objeto (se tiver SelectableObject)
                     hitObject.SendMessage("OnGazeEnter", SendMessageOptions.DontRequireReceiver);
-                    
-                    Debug.Log($"[GAZE] Novo alvo: {hitObject.name}");
                 }
-                else
+
+                // 🔹 Some o ponto quando está olhando para algo interativo
+                if (reticlePoint != null)
+                    reticlePoint.enabled = false;
+
+                // 🔹 Atualiza o círculo de carregamento
+                if (!gazeCompleted)
                 {
-                    // Continua olhando para o mesmo objeto
                     gazeTimer += Time.deltaTime;
-                    
-                    // Log a cada 0.5s
-                    if (gazeTimer % 0.5f < Time.deltaTime)
-                    {
-                        Debug.Log($"[GAZE] Timer: {gazeTimer:F1}s / {gazeTime}s");
-                    }
-                    
-                    // Atualiza o círculo de progresso
+                    float progress = Mathf.Clamp01(gazeTimer / gazeTime);
+
                     if (reticleFill != null)
                     {
-                        reticleFill.fillAmount = gazeTimer / gazeTime;
+                        reticleFill.fillAmount = progress;
+                        reticleFill.enabled = true;
                     }
 
-                    // Notifica o objeto
-                    hitObject.SendMessage("OnGazeStay", SendMessageOptions.DontRequireReceiver);
-
-                    // Completa o gaze
-                    if (gazeTimer >= gazeTime)
+                    if (progress >= 1f)
                     {
+                        gazeCompleted = true;
                         ExecuteGazeAction(hitObject);
-                        ResetGaze();
+                        if (reticleFill != null)
+                            reticleFill.fillAmount = 1f;
                     }
                 }
-
-                // Muda cor do reticle para hover
-                if (reticlePoint != null)
-                    reticlePoint.color = hoverColor;
-
-                if (reticleFill != null && !reticleFill.enabled)
-                    reticleFill.enabled = true;
             }
             else
             {
-                // Hit em algo não selecionável
-                Debug.Log($"[RAYCAST] Hit objeto SEM tag 'Selectable': {hitObject.name}");
                 ResetGaze();
             }
         }
         else
         {
-            // Não acertou nada
             ResetGaze();
         }
 
-        // Também detecta toque/clique direto (backup)
+        // Clique manual (backup)
         if (Input.GetMouseButtonDown(0) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
         {
-            Debug.Log("[INPUT] Toque/clique detectado!");
-            if (currentGazedObject != null && currentButton != null)
+            if (currentGazedObject != null)
             {
                 ExecuteGazeAction(currentGazedObject);
                 ResetGaze();
@@ -133,14 +109,9 @@ public class SolarVRGaze : MonoBehaviour
     {
         Debug.Log($"✓✓✓ GAZE COMPLETE: {target.name}");
 
-        // Se for um Button UI, clica nele
         if (currentButton != null)
-        {
             currentButton.onClick.Invoke();
-            Debug.Log($"→ Botão clicado: {target.name}");
-        }
 
-        // Notifica o objeto (SelectableObject se tiver)
         target.SendMessage("OnGazeSelect", SendMessageOptions.DontRequireReceiver);
     }
 
@@ -154,22 +125,25 @@ public class SolarVRGaze : MonoBehaviour
         }
 
         gazeTimer = 0f;
+        gazeCompleted = false;
 
+        // 🔹 Some o círculo
         if (reticleFill != null)
         {
             reticleFill.fillAmount = 0f;
             reticleFill.enabled = false;
         }
 
+        // 🔹 Volta a mostrar o ponto
         if (reticlePoint != null)
         {
+            reticlePoint.enabled = true;
             reticlePoint.color = normalColor;
         }
     }
 
     void OnDrawGizmos()
     {
-        // Desenha o raycast no editor
         Gizmos.color = Color.cyan;
         Gizmos.DrawRay(transform.position, transform.forward * raycastDistance);
     }
