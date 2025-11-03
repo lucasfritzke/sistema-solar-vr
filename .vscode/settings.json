@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "SistemaSolar.sln"
+    "dotnet.defaultSolution": "sistema-solar-vr.sln"
 }

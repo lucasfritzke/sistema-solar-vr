@@ -8,16 +8,16 @@ public class GazeTarget : MonoBehaviour
     void Start()
     {
         rend = GetComponent<Renderer>();
-        if (rend != null)
+        if (rend != null && rend.material.HasProperty("_Color"))
             originalColor = rend.material.color;
     }
 
     public void OnGazeEnter()
     {
-        if (rend != null)
-            rend.material.color = Color.yellow; // destaca quando começa a olhar
-        Debug.Log($" Entrou no gaze: {name}");
+        if (rend != null && rend.material.HasProperty("_Color"))
+            rend.material.color = Color.yellow;
     }
+
 
     public void OnGazeStay()
     {

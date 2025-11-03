@@ -7,6 +7,7 @@ TagManager:
   - CenterButton
   - TourButton
   - Selectable
+  - Planet
   layers:
   - Default
   - TransparentFX
