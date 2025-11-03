@@ -3185,6 +3185,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2061104982}
+  - {fileID: 1970991276}
   m_Father: {fileID: 681459162}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &187
@@ -7839,6 +7840,7 @@ GameObject:
   - component: {fileID: 830657087}
   - component: {fileID: 830657089}
   - component: {fileID: 830657088}
+  - component: {fileID: 830657090}
   m_Layer: 5
   m_Name: UICanvas
   m_TagString: Untagged
@@ -7853,7 +7855,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 830657086}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -29.400002}
   m_LocalScale: {x: 0.0018112949, y: 0.0018112949, z: 0.0018112949}
   m_ConstrainProportionsScale: 0
@@ -7864,7 +7866,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: -2.7175999}
-  m_SizeDelta: {x: 980.99994, y: 510}
+  m_SizeDelta: {x: 976, y: 510}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &830657088
 MonoBehaviour:
@@ -7906,6 +7908,20 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!114 &830657090
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 830657086}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39a77868849bc5d40b2cafb55b5e5e21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cameraTransform: {fileID: 186}
+  offset: {x: 0, y: 0, z: 0.8}
 --- !u!1 &876921151
 GameObject:
   m_ObjectHideFlags: 0
@@ -9358,31 +9374,104 @@ MonoBehaviour:
   - targetPosition: {fileID: 106}
     cameraOffset: {x: 0, y: 0, z: -0.1}
     moveDuration: 3
-    questions: []
+    questions:
+    - question: "Por que o movimento de rota\xE7\xE3o de V\xEAnus \xE9 especial?"
+      alternatives:
+      - "Ele gira muito r\xE1pido"
+      - "Ele gira no sentido contr\xE1rio da maioria dos planetas"
+      corretAnswer: 1
+    - question: "Qual \xE9 o principal componente da atmosfera de V\xEAnus?"
+      alternatives:
+      - "Di\xF3xido de carbono"
+      - "Nitrog\xEAnio"
+      corretAnswer: 0
   - targetPosition: {fileID: 176}
     cameraOffset: {x: 0, y: 0, z: -0.1}
     moveDuration: 3
-    questions: []
+    questions:
+    - question: "Qual \xE9 o percentual aproximado da superf\xEDcie da Terra coberta
+        por \xE1gua?"
+      alternatives:
+      - 70%
+      - 90%
+      corretAnswer: 0
+    - question: "O que causa as esta\xE7\xF5es do ano no planeta Terra?"
+      alternatives:
+      - "A dist\xE2ncia do Sol"
+      - "A inclina\xE7\xE3o do eixo terrestre"
+      corretAnswer: 1
   - targetPosition: {fileID: 174}
     cameraOffset: {x: 0, y: 0, z: -3}
     moveDuration: 3
-    questions: []
+    questions:
+    - question: "Qual o nome do maior vulc\xE3o de Marte, tamb\xE9m o maior do Sistema
+        Solar?"
+      alternatives:
+      - Monte Olimpo (Olympus Mons)
+      - Monte Etna
+      corretAnswer: 0
+    - question: O que existe nas calotas polares de Marte?
+      alternatives:
+      - Areia vermelha
+      - "Gelo de \xE1gua e di\xF3xido de carbono"
+      corretAnswer: 1
   - targetPosition: {fileID: 173}
     cameraOffset: {x: 0, y: 3, z: -2}
     moveDuration: 4
-    questions: []
+    questions:
+    - question: "Qual \xE9 a famosa tempestade gigante em J\xFApiter, vis\xEDvel
+        h\xE1 s\xE9culos?"
+      alternatives:
+      - Mancha Vermelha
+      - Buraco Branco
+      corretAnswer: 0
+    - question: "Quantas luas aproximadamente J\xFApiter possui?"
+      alternatives:
+      - Mais de 90
+      - Nenhuma
+      corretAnswer: 0
   - targetPosition: {fileID: 172}
     cameraOffset: {x: 0, y: 3, z: -2}
     moveDuration: 4
-    questions: []
+    questions:
+    - question: "Do que s\xE3o formados os an\xE9is de Saturno?"
+      alternatives:
+      - Pedras preciosas
+      - Poeira e gelo
+      corretAnswer: 1
+    - question: "Qual \xE9 o nome da maior lua de Saturno?"
+      alternatives:
+      - "Tit\xE3"
+      - Ganimedes
+      corretAnswer: 0
   - targetPosition: {fileID: 171}
     cameraOffset: {x: 0, y: 2, z: -2}
     moveDuration: 4
-    questions: []
+    questions:
+    - question: "O que torna o eixo de Urano \xFAnico?"
+      alternatives:
+      - "Ele gira \u201Cde lado\u201D, quase deitado"
+      - "Ele n\xE3o tem eixo"
+      corretAnswer: 0
+    - question: O que causa a cor azul-esverdeada de Urano?
+      alternatives:
+      - O metano em sua atmosfera
+      - O gelo
+      corretAnswer: 0
   - targetPosition: {fileID: 177}
     cameraOffset: {x: 0, y: 0, z: -2}
     moveDuration: 4
-    questions: []
+    questions:
+    - question: "Qual \xE9 a principal caracter\xEDstica dos ventos em Netuno?"
+      alternatives:
+      - "S\xE3o os mais r\xE1pidos do Sistema Solar"
+      - "N\xE3o existem ventos"
+      corretAnswer: 0
+    - question: "O que d\xE1 a Netuno sua cor azul intensa?"
+      alternatives:
+      - "A presen\xE7a de metano"
+      - "A dist\xE2ncia do Sol"
+      corretAnswer: 0
   - targetPosition: {fileID: 182}
     cameraOffset: {x: 0, y: 0, z: -2}
     moveDuration: 3
@@ -9420,6 +9509,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c1bec00a1c4f4d4fadca63f151063ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1970991275
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1970991276}
+  m_Layer: 0
+  m_Name: UIAncor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1970991276
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1970991275}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 186}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2040461347
 GameObject:
   m_ObjectHideFlags: 0
