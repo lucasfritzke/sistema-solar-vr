@@ -15,14 +15,15 @@ public class PlanetQuiz : MonoBehaviour
     public Color incorrectColor = Color.red;
     public Color retryColor = new Color(1f, 0.64f, 0f);
 
-    private GameManager gameManager;
     public Canvas quizCanvas;             // Canvas do quiz
     private int currentQuestionIndex = 0;
     private bool quizActivated = false;
+    private XRRigMover rigMover;
 
     void Start()
     {
         // Garante que o quiz comece desativado
+        rigMover = FindObjectOfType<XRRigMover>();
         if (quizCanvas != null)
             quizCanvas.gameObject.SetActive(false);
 
@@ -35,9 +36,8 @@ public class PlanetQuiz : MonoBehaviour
         // Garante que o botão "Próximo Planeta" comece oculto
         if (nextPlanetButton != null)
         {
-            nextPlanetButton.gameObject.SetActive(false);
 
-            // Remove listeners antigos e adiciona o correto
+            nextPlanetButton.gameObject.SetActive(false);
             nextPlanetButton.onClick.RemoveAllListeners();
             nextPlanetButton.onClick.AddListener(OnNextPlanet);
         }
@@ -45,11 +45,6 @@ public class PlanetQuiz : MonoBehaviour
         {
             Debug.LogWarning("⚠️ O botão 'Next Planet' não foi atribuído no PlanetQuiz.");
         }
-
-      
-        gameManager = FindObjectOfType<GameManager>();
-        if (gameManager == null)
-            Debug.LogWarning("⚠️ Nenhum GameManager encontrado na cena!");
     }
 
     void HideAllQuestions()
@@ -73,13 +68,13 @@ public class PlanetQuiz : MonoBehaviour
     {
         if (isCorrect)
         {
-            feedbackText.text = "Correto!";
+            feedbackText.text = "Parabéns você acertou!";
             feedbackText.color = correctColor;
             Invoke(nameof(NextQuestion), 1.2f);
         }
         else
         {
-            feedbackText.text = "Resposta incorreta! Tente novamente.";
+            feedbackText.text = "Tente novamente!";
             feedbackText.color = incorrectColor;
             Invoke(nameof(RepeatOrReset), 1.8f);
         }
@@ -112,13 +107,16 @@ public class PlanetQuiz : MonoBehaviour
 
     public void OnNextPlanet()
     {
+        // Oculta o quiz imediatamente antes de mover
+        if (quizCanvas != null)
+            quizCanvas.gameObject.SetActive(false);
+
         feedbackText.text = "";
         nextPlanetButton.gameObject.SetActive(false);
-        HideAllQuestions();
-        quizCanvas.gameObject.SetActive(false); // opcional: fecha quiz ao mudar de planeta
-        if (gameManager != null)
-            Debug.LogWarning("Indo para próximo planeta");
-            gameManager.NextPlanet();
+
+        // Move a câmera
+        if (rigMover != null)
+            rigMover.NextPlanet(); ;
     }
 
     public void ActivateQuiz()

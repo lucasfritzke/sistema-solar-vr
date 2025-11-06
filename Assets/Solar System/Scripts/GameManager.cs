@@ -70,7 +70,7 @@ public class GameManager : MonoBehaviour
         Vector3 startPos = cameraRig.position;
         Quaternion startRot = cameraRig.rotation;
 
-        Vector3 targetPos = planet.targetPosition.position + planet.cameraOffset;
+        Vector3 targetPos = planet.targetPosition.TransformPoint(planet.cameraOffset);
         Quaternion targetRot = Quaternion.LookRotation(planet.targetPosition.position - targetPos);
 
         float elapsed = 0f;
