@@ -8,20 +8,19 @@ public class SolarVRGaze : MonoBehaviour
     [Header("Configurações de Gaze")]
     public float gazeTime = 2f;
     public float raycastDistance = 100f;
-    public LayerMask interactableLayers = -1; // Layer para planetas e objetos interativos
+    public LayerMask interactableLayers = -1;
 
     [Header("Referências UI")]
     public Image reticlePoint;
     public Image reticleFill;
-    public GraphicRaycaster graphicRaycaster; // Para UI (Canvas)
     public EventSystem eventSystem;
 
     private float gazeTimer = 0f;
-    private GameObject currentTarget;
-    private Button currentButton;
-    private Camera mainCamera;
     private bool gazeCompleted = false;
-    private PointerEventData pointerEventData;
+    private GameObject currentTarget;
+    private Camera mainCamera;
+    private Button currentButton;
+    private GraphicRaycaster[] allRaycasters;
 
     void Start()
     {
@@ -39,56 +38,57 @@ public class SolarVRGaze : MonoBehaviour
         if (eventSystem == null)
             eventSystem = FindObjectOfType<EventSystem>();
 
-        if (graphicRaycaster == null)
-        {
-            Canvas canvas = FindObjectOfType<Canvas>();
-            if (canvas != null)
-                graphicRaycaster = canvas.GetComponent<GraphicRaycaster>();
-        }
+        // Busca todos os canvases da cena (um por planeta, no seu caso)
+        allRaycasters = FindObjectsOfType<GraphicRaycaster>(true);
     }
 
     void Update()
     {
-        // Primeiro tenta UI
+        // 1️⃣ Tenta interagir com UI (botões 2D)
         if (!CheckUIGaze())
         {
-            // Se não acertou UI, tenta 3D
+            // 2️⃣ Se não encontrou UI, tenta 3D
             Check3DGaze();
         }
     }
 
-    // Retorna true se acertou algum UI interactable
     bool CheckUIGaze()
     {
-        if (graphicRaycaster == null || eventSystem == null)
+        if (allRaycasters == null || eventSystem == null)
             return false;
 
-        pointerEventData = new PointerEventData(eventSystem)
+        PointerEventData pointerEventData = new PointerEventData(eventSystem)
         {
             position = new Vector2(Screen.width / 2f, Screen.height / 2f)
         };
 
-        List<RaycastResult> results = new List<RaycastResult>();
-        graphicRaycaster.Raycast(pointerEventData, results);
-
-        foreach (RaycastResult result in results)
+        foreach (var raycaster in allRaycasters)
         {
-            Button btn = result.gameObject.GetComponent<Button>();
-            if (btn != null && btn.interactable)
-            {
-                if (result.gameObject != currentTarget)
-                {
-                    ResetGaze();
-                    currentTarget = result.gameObject;
-                    currentButton = btn;
-                }
+            if (!raycaster.isActiveAndEnabled)
+                continue;
 
-                HandleGazeProgress(currentTarget);
-                return true; // UI detectado
+            List<RaycastResult> results = new List<RaycastResult>();
+            raycaster.Raycast(pointerEventData, results);
+
+            foreach (var result in results)
+            {
+                Button btn = result.gameObject.GetComponent<Button>();
+                if (btn != null && btn.interactable)
+                {
+                    if (result.gameObject != currentTarget)
+                    {
+                        ResetGaze();
+                        currentTarget = result.gameObject;
+                        currentButton = btn;
+                    }
+
+                    HandleGazeProgress();
+                    return true;
+                }
             }
         }
 
-        return false; // nada detectado
+        return false;
     }
 
     void Check3DGaze()
@@ -104,10 +104,9 @@ public class SolarVRGaze : MonoBehaviour
             {
                 ResetGaze();
                 currentTarget = hitObject;
-                currentButton = hitObject.GetComponent<Button>();
             }
 
-            HandleGazeProgress(currentTarget);
+            HandleGazeProgress();
         }
         else
         {
@@ -115,7 +114,7 @@ public class SolarVRGaze : MonoBehaviour
         }
     }
 
-    void HandleGazeProgress(GameObject target)
+    void HandleGazeProgress()
     {
         if (reticlePoint != null)
             reticlePoint.enabled = false;
@@ -132,44 +131,43 @@ public class SolarVRGaze : MonoBehaviour
                 if (reticleFill.fillAmount >= 1f)
                 {
                     gazeCompleted = true;
-                    ExecuteGazeAction(target);
+                    ExecuteGazeAction();
                 }
             }
         }
     }
 
-    void ExecuteGazeAction(GameObject target)
+    void ExecuteGazeAction()
     {
-        Debug.Log("ExecuteGazeAction chamado para: " + target.name);
-        // Botão do UI
-        if (currentButton != null)
+        if (currentTarget == null) return;
+
+         if (currentButton != null)
         {
             currentButton.onClick.Invoke();
             return;
         }
 
-        // Busca PlanetQuiz em qualquer filho do prefab do planeta
-        PlanetQuiz planetQuiz = target.GetComponentInChildren<PlanetQuiz>(true);
+        // Caso seja um planeta
+        PlanetQuiz planetQuiz = currentTarget.GetComponentInChildren<PlanetQuiz>(true);
         if (planetQuiz != null)
         {
-            Debug.Log("PlanetQuiz encontrado no filho de: " + target.name);
+            Debug.Log("PlanetQuiz encontrado no filho de: " + currentTarget.name);
             planetQuiz.ActivateQuiz();
             return;
         }
         else
         {
-            Debug.LogWarning("PlanetQuiz NÃO encontrado no alvo: " + target.name);
+            Debug.LogWarning("PlanetQuiz NÃO encontrado no alvo: " + currentTarget.name);
         }
-            // Mantém caso tenha outros scripts escutando gaze
-            target.SendMessage("OnGazeSelect", SendMessageOptions.DontRequireReceiver);
+        currentTarget.SendMessage("OnGazeSelect", SendMessageOptions.DontRequireReceiver);
     }
 
     void ResetGaze()
     {
-        currentTarget = null;
-        currentButton = null;
         gazeTimer = 0f;
         gazeCompleted = false;
+        currentTarget = null;
+        currentButton = null;
 
         if (reticlePoint != null)
             reticlePoint.enabled = true;
