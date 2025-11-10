@@ -113,6 +113,17 @@ public class XRRigMover : MonoBehaviour
 
         Debug.Log($"CameraRig posição final: {cameraRig.position}");
         Debug.Log("--------------------------------------------");
+
+        // Notifica que a câmera chegou perto do planeta para iniciar o áudio
+        if (ct.targetReference != null)
+        {
+            PlanetQuiz planetQuiz = ct.targetReference.GetComponentInChildren<PlanetQuiz>(true);
+            if (planetQuiz != null)
+            {
+                planetQuiz.OnCameraArrived();
+            }
+        }
+
         yield break;
     }
 
@@ -180,6 +191,16 @@ public class XRRigMover : MonoBehaviour
         Debug.Log($"CameraRig posição final: {cameraRig.position}");
         Debug.Log($"MainCamera posição final: {mainCameraTransform.position}");
         Debug.Log("--------------------------------------------");
+
+        // Notifica que a câmera chegou perto do planeta para iniciar o áudio
+        if (ct.targetReference != null)
+        {
+            PlanetQuiz planetQuiz = ct.targetReference.GetComponentInChildren<PlanetQuiz>(true);
+            if (planetQuiz != null)
+            {
+                planetQuiz.OnCameraArrived();
+            }
+        }
 
         yield break;
     }
