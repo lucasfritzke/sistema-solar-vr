@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class PlanetQuiz : MonoBehaviour
 {
@@ -28,20 +28,20 @@ public class PlanetQuiz : MonoBehaviour
     private bool audioFinished = false;
     private bool audioStarted = false;
     private Coroutine audioCoroutine;
-    
+
     // Mapeamento de índices de planetas para nomes de áudio
     private static readonly string[] planetAudioNames = {
-        "sol", "mercurio", "venus", "terra", "marte", "jupter", "saturno", "netuno"
+        "sol", "mercurio", "venus", "terra", "marte", "jupter", "saturno","urano", "netuno"
     };
 
     void Start()
     {
         // Garante que o quiz comece desativado
         rigMover = FindObjectOfType<XRRigMover>();
-        
+
         // Busca automaticamente os componentes se não foram atribuídos
         FindComponentsIfNeeded();
-        
+
         if (quizCanvas != null)
             quizCanvas.gameObject.SetActive(false);
 
@@ -51,7 +51,7 @@ public class PlanetQuiz : MonoBehaviour
         if (feedbackText != null)
             feedbackText.text = "";
 
-        // Configura AudioSource se não foi atribuído
+        // Configura AudioSource se não foi atribuídoI
         if (audioSource == null)
         {
             audioSource = GetComponent<AudioSource>();
@@ -68,43 +68,23 @@ public class PlanetQuiz : MonoBehaviour
             nextPlanetButton.onClick.RemoveAllListeners();
             nextPlanetButton.onClick.AddListener(OnNextPlanet);
         }
-        else
-        {
-            Debug.LogWarning("⚠️ O botão 'Next Planet' não foi atribuído no PlanetQuiz.");
-        }
-
-        // Configura o botão de repetir áudio (após a busca automática)
         ConfigureReplayButton();
     }
 
     void ConfigureReplayButton()
     {
-        if (replayAudioButton != null)
-        {
-            replayAudioButton.onClick.RemoveAllListeners();
-            replayAudioButton.onClick.AddListener(OnReplayAudioButtonClicked);
-            
-            // Garante que o botão está interativo
-            replayAudioButton.interactable = true;
-            
-            Debug.Log($"[PlanetQuiz] Botão de replay configurado: {replayAudioButton.name}");
-            Debug.Log($"[PlanetQuiz] Botão interativo: {replayAudioButton.interactable}");
-        }
-        else
-        {
-            Debug.LogWarning("[PlanetQuiz] Botão de replay não encontrado. O usuário não poderá repetir o áudio.");
-        }
+        replayAudioButton.onClick.RemoveAllListeners();
+        replayAudioButton.onClick.AddListener(OnReplayAudioButtonClicked);
+
+        // Garante que o botão está interativo
+        replayAudioButton.interactable = true;
     }
 
     void OnReplayAudioButtonClicked()
     {
-        Debug.Log("[PlanetQuiz] ====== Botão de replay clicado! ======");
-        Debug.Log($"[PlanetQuiz] AudioSource existe: {audioSource != null}");
-        Debug.Log($"[PlanetQuiz] AudioClip carregado: {planetAudioClip != null}");
+
         if (planetAudioClip != null)
-            Debug.Log($"[PlanetQuiz] Nome do áudio: {planetAudioClip.name}");
-        
-        PlayPlanetAudio();
+            PlayPlanetAudio();
     }
 
     void FindComponentsIfNeeded()
@@ -140,12 +120,12 @@ public class PlanetQuiz : MonoBehaviour
                         }
                     }
                 }
-                
+
                 if (feedbackTransform != null)
                 {
                     feedbackText = feedbackTransform.GetComponent<TMP_Text>();
                 }
-                
+
                 if (feedbackText == null)
                 {
                     // Última tentativa: busca qualquer TMP_Text que contenha "feedback" no nome
@@ -178,7 +158,7 @@ public class PlanetQuiz : MonoBehaviour
                         }
                     }
                 }
-                
+
                 if (buttonTransform != null)
                 {
                     nextPlanetButton = buttonTransform.GetComponent<Button>();
@@ -196,7 +176,7 @@ public class PlanetQuiz : MonoBehaviour
                     // Ignora botões que não são de replay
                     if (btnName.Contains("next") || btnName.Contains("option") || btnName.Contains("feedback"))
                         continue;
-                    
+
                     // Procura por botões que contenham "replay" ou "audio" no nome
                     if (btnName.Contains("replay") || (btnName.Contains("audio") && !btnName.Contains("next")))
                     {
@@ -204,7 +184,7 @@ public class PlanetQuiz : MonoBehaviour
                         break;
                     }
                 }
-                
+
                 // Se não encontrou por nome, tenta buscar por texto do botão
                 if (replayAudioButton == null)
                 {
@@ -213,7 +193,7 @@ public class PlanetQuiz : MonoBehaviour
                         string btnName = btn.name.ToLower();
                         if (btnName.Contains("next") || btnName.Contains("option"))
                             continue;
-                        
+
                         // Verifica o texto do botão
                         TMP_Text buttonText = btn.GetComponentInChildren<TMP_Text>(true);
                         if (buttonText != null)
@@ -233,25 +213,25 @@ public class PlanetQuiz : MonoBehaviour
             if (questionPanels == null || questionPanels.Length == 0)
             {
                 List<GameObject> panels = new List<GameObject>();
-                
+
                 // Busca botões de opção (Button_Option1, Button_Option2, etc.)
                 Button[] allButtons = quizCanvas.GetComponentsInChildren<Button>(true);
                 HashSet<GameObject> foundPanels = new HashSet<GameObject>();
-                
+
                 foreach (Button btn in allButtons)
                 {
                     string btnName = btn.name.ToLower();
                     // Ignora botões que não são de opção
                     if (btnName.Contains("next") || btnName.Contains("replay"))
                         continue;
-                    
+
                     // Se o botão tem "option" no nome, encontra seu container pai
                     if (btnName.Contains("option"))
                     {
                         // Encontra o container pai (que deve ser o painel)
                         // O painel geralmente é um filho direto do Canvas ou um nível acima dos botões
                         Transform parent = btn.transform.parent;
-                        
+
                         // Procura o container que contém os botões de opção
                         // Geralmente é um GameObject que tem múltiplos botões como filhos
                         while (parent != null && parent != quizCanvas.transform)
@@ -269,7 +249,7 @@ public class PlanetQuiz : MonoBehaviour
                                     }
                                 }
                             }
-                            
+
                             // Se encontrou um container com pelo menos 2 botões de opção, é um painel
                             if (optionButtonCount >= 2)
                             {
@@ -280,12 +260,12 @@ public class PlanetQuiz : MonoBehaviour
                                 }
                                 break;
                             }
-                            
+
                             parent = parent.parent;
                         }
                     }
                 }
-                
+
                 // Se não encontrou painéis pelos botões, procura por nome
                 if (panels.Count == 0)
                 {
@@ -296,9 +276,9 @@ public class PlanetQuiz : MonoBehaviour
                         string childName = child.name.ToLower();
                         // Procura por objetos que contenham "panel" e "question" no nome
                         // ou apenas "panel_question" ou padrões similares
-                        if ((childName.Contains("question") && childName.Contains("panel")) 
+                        if ((childName.Contains("question") && childName.Contains("panel"))
                             || (childName.Contains("panel") && (childName.Contains("question") || childName.Contains("quiz")))
-                            || childName.StartsWith("panel_question") 
+                            || childName.StartsWith("panel_question")
                             || childName.StartsWith("questionpanel"))
                         {
                             // Verifica se não é um botão ou texto, mas sim um container
@@ -312,33 +292,12 @@ public class PlanetQuiz : MonoBehaviour
                         }
                     }
                 }
-                
+
                 if (panels.Count > 0)
                 {
                     questionPanels = panels.ToArray();
-                    Debug.Log($"[PlanetQuiz] Encontrados {panels.Count} painéis de pergunta: {string.Join(", ", System.Array.ConvertAll(panels.ToArray(), p => p.name))}");
-                }
-                else
-                {
-                    Debug.LogWarning("[PlanetQuiz] Não foi possível encontrar os Question Panels automaticamente. Configure manualmente no Inspector.");
-                }
+                }                  
             }
-
-            // Log dos componentes encontrados
-            if (quizCanvas != null)
-                Debug.Log($"[PlanetQuiz] Canvas encontrado: {quizCanvas.name}");
-            if (feedbackText != null)
-                Debug.Log($"[PlanetQuiz] FeedbackText encontrado: {feedbackText.name}");
-            if (nextPlanetButton != null)
-                Debug.Log($"[PlanetQuiz] NextPlanetButton encontrado: {nextPlanetButton.name}");
-            if (replayAudioButton != null)
-                Debug.Log($"[PlanetQuiz] ReplayAudioButton encontrado: {replayAudioButton.name}");
-            if (questionPanels != null && questionPanels.Length > 0)
-                Debug.Log($"[PlanetQuiz] QuestionPanels encontrados: {questionPanels.Length} painéis");
-        }
-        else
-        {
-            Debug.LogWarning("[PlanetQuiz] Canvas não encontrado! Certifique-se de que o Canvas está como filho deste GameObject ou atribua manualmente no Inspector.");
         }
     }
 
@@ -354,7 +313,7 @@ public class PlanetQuiz : MonoBehaviour
         {
             bool active = i == currentQuestionIndex;
             questionPanels[i].SetActive(active);
-            
+
         }
     }
 
@@ -462,7 +421,7 @@ public class PlanetQuiz : MonoBehaviour
     void LoadAndPlayPlanetAudio()
     {
         Debug.Log("[PlanetQuiz] LoadAndPlayPlanetAudio chamado");
-        
+
         // Marca como iniciado, mas permite recarregar se necessário (para replay)
         if (!audioStarted)
         {
@@ -503,7 +462,7 @@ public class PlanetQuiz : MonoBehaviour
         {
             string audioName = planetAudioNames[planetIndex];
             planetAudioClip = Resources.Load<AudioClip>(audioName);
-            
+
             if (planetAudioClip != null)
             {
                 Debug.Log($"[PlanetQuiz] Áudio carregado: {audioName}");
@@ -527,7 +486,7 @@ public class PlanetQuiz : MonoBehaviour
     void PlayPlanetAudio()
     {
         Debug.Log("[PlanetQuiz] PlayPlanetAudio chamado");
-        
+
         // Se o áudio ainda não foi carregado, tenta carregar primeiro
         if (planetAudioClip == null)
         {
@@ -550,27 +509,27 @@ public class PlanetQuiz : MonoBehaviour
         {
             Debug.Log($"[PlanetQuiz] Reproduzindo áudio: {planetAudioClip.name}");
             Debug.Log($"[PlanetQuiz] AudioSource está tocando antes: {audioSource.isPlaying}");
-            
+
             // Para qualquer áudio que esteja tocando
             audioSource.Stop();
-            
+
             // Configura o clip
             audioSource.clip = planetAudioClip;
-            
+
             // Garante que o AudioSource está habilitado
             if (!audioSource.enabled)
             {
                 audioSource.enabled = true;
                 Debug.Log("[PlanetQuiz] AudioSource estava desabilitado, habilitando agora");
             }
-            
+
             // Toca o áudio
             audioSource.Play();
-            
+
             Debug.Log($"[PlanetQuiz] AudioSource está tocando depois: {audioSource.isPlaying}");
             Debug.Log($"[PlanetQuiz] Volume do AudioSource: {audioSource.volume}");
             Debug.Log($"[PlanetQuiz] Duração do áudio: {planetAudioClip.length} segundos");
-            
+
             // Se o quiz já está ativo e visível, apenas toca o áudio
             // Não precisa esperar para mostrar o quiz (já está visível)
             if (quizActivated && quizCanvas != null && quizCanvas.gameObject.activeSelf)
@@ -582,7 +541,7 @@ public class PlanetQuiz : MonoBehaviour
                 // Não precisa iniciar nova corrotina, apenas toca o áudio
                 return;
             }
-            
+
             // Se o quiz não está visível ainda, espera o áudio terminar
             if (audioCoroutine != null)
                 StopCoroutine(audioCoroutine);

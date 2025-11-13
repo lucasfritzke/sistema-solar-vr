@@ -22,6 +22,10 @@ public class SolarVRGaze : MonoBehaviour
     private Button currentButton;
     private GraphicRaycaster[] allRaycasters;
 
+    // 🟡 Controle de destaque (agora com dicionário)
+    private Button lastHighlightedButton;
+    private Dictionary<Button, Color> originalColors = new Dictionary<Button, Color>();
+
     void Start()
     {
         mainCamera = Camera.main;
@@ -38,7 +42,7 @@ public class SolarVRGaze : MonoBehaviour
         if (eventSystem == null)
             eventSystem = FindObjectOfType<EventSystem>();
 
-        // Busca todos os canvases da cena (um por planeta, no seu caso)
+        // Busca todos os canvases da cena
         allRaycasters = FindObjectsOfType<GraphicRaycaster>(true);
     }
 
@@ -75,6 +79,13 @@ public class SolarVRGaze : MonoBehaviour
                 Button btn = result.gameObject.GetComponent<Button>();
                 if (btn != null && btn.interactable)
                 {
+                    // 🟢 Troca de botão = atualiza highlight
+                    if (btn != lastHighlightedButton)
+                    {
+                        ResetButtonHighlight();
+                        HighlightButton(btn);
+                    }
+
                     if (result.gameObject != currentTarget)
                     {
                         ResetGaze();
@@ -88,7 +99,34 @@ public class SolarVRGaze : MonoBehaviour
             }
         }
 
+        // Nenhum botão atingido
+        ResetButtonHighlight();
         return false;
+    }
+
+    void HighlightButton(Button btn)
+    {
+        if (btn != null && btn.image != null)
+        {
+            lastHighlightedButton = btn;
+
+            // Guarda cor original individual
+            if (!originalColors.ContainsKey(btn))
+                originalColors[btn] = btn.image.color;
+
+            Color baseColor = originalColors[btn];
+            btn.image.color = baseColor * 1.8f; // Aumenta brilho
+        }
+    }
+
+    void ResetButtonHighlight()
+    {
+        if (lastHighlightedButton != null && lastHighlightedButton.image != null)
+        {
+            if (originalColors.ContainsKey(lastHighlightedButton))
+                lastHighlightedButton.image.color = originalColors[lastHighlightedButton];
+        }
+        lastHighlightedButton = null;
     }
 
     void Check3DGaze()
@@ -141,7 +179,7 @@ public class SolarVRGaze : MonoBehaviour
     {
         if (currentTarget == null) return;
 
-         if (currentButton != null)
+        if (currentButton != null)
         {
             currentButton.onClick.Invoke();
             return;
@@ -159,6 +197,7 @@ public class SolarVRGaze : MonoBehaviour
         {
             Debug.LogWarning("PlanetQuiz NÃO encontrado no alvo: " + currentTarget.name);
         }
+
         currentTarget.SendMessage("OnGazeSelect", SendMessageOptions.DontRequireReceiver);
     }
 
@@ -166,6 +205,10 @@ public class SolarVRGaze : MonoBehaviour
     {
         gazeTimer = 0f;
         gazeCompleted = false;
+
+        // 🔹 Antes de limpar, restaura cor
+        ResetButtonHighlight();
+
         currentTarget = null;
         currentButton = null;
 
