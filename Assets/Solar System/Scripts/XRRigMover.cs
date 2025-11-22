@@ -202,6 +202,19 @@ public class XRRigMover : MonoBehaviour
             }
         }
 
+        if (currentIndex + 1 == targets.Count)
+        {
+            Debug.Log("Última parada!");
+            Orbit[] orbits = FindObjectsByType<Orbit>(FindObjectsSortMode.None);
+            foreach (Orbit orbit in orbits)
+            {
+                if (orbit != null)
+                {
+                    orbit.enabled = true;
+                }
+            }
+        }
+
         yield break;
     }
 
