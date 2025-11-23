@@ -10147,7 +10147,7 @@ MonoBehaviour:
   gameManager: {fileID: 1895046487}
   panel: {fileID: 1732998310}
   button: {fileID: 891679471}
-  painelRef: {fileID: 0}
+  painelRef: {fileID: 1916995188}
 --- !u!1 &840331767
 GameObject:
   m_ObjectHideFlags: 0
