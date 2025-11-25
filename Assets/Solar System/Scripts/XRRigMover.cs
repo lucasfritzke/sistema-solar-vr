@@ -114,14 +114,14 @@ public class XRRigMover : MonoBehaviour
         Debug.Log($"CameraRig posição final: {cameraRig.position}");
         Debug.Log("--------------------------------------------");
 
-        // Notifica que a câmera chegou perto do planeta para iniciar o áudio
+        // Notifica que a câmera chegou (funciona com qualquer script)
         if (ct.targetReference != null)
         {
-            PlanetQuiz planetQuiz = ct.targetReference.GetComponentInChildren<PlanetQuiz>(true);
-            if (planetQuiz != null)
-            {
-                planetQuiz.OnCameraArrived();
-            }
+            // Tenta chamar OnCameraArrived em qualquer script do target
+            ct.targetReference.SendMessage("OnCameraArrived", SendMessageOptions.DontRequireReceiver);
+
+            // Também tenta nos filhos (para compatibilidade com PlanetQuiz)
+            ct.targetReference.BroadcastMessage("OnCameraArrived", SendMessageOptions.DontRequireReceiver);
         }
 
         yield break;
@@ -130,6 +130,14 @@ public class XRRigMover : MonoBehaviour
     IEnumerator MoveToIndex(int index)
     {
         isMoving = true;
+        if (currentIndex >= 0 && currentIndex < targets.Count)
+        {
+            CutTarget previousTarget = targets[currentIndex];
+            if (previousTarget.targetReference != null)
+            {
+                previousTarget.targetReference.SendMessage("HideLabel", SendMessageOptions.DontRequireReceiver);
+            }
+        }
         CutTarget ct = targets[index];
 
         // calcula posição desejada da câmera
@@ -195,11 +203,11 @@ public class XRRigMover : MonoBehaviour
         // Notifica que a câmera chegou perto do planeta para iniciar o áudio
         if (ct.targetReference != null)
         {
-            PlanetQuiz planetQuiz = ct.targetReference.GetComponentInChildren<PlanetQuiz>(true);
-            if (planetQuiz != null)
-            {
-                planetQuiz.OnCameraArrived();
-            }
+            // Tenta chamar OnCameraArrived em qualquer script do target
+            ct.targetReference.SendMessage("OnCameraArrived", SendMessageOptions.DontRequireReceiver);
+
+            // Também tenta nos filhos (para compatibilidade com PlanetQuiz)
+            ct.targetReference.BroadcastMessage("OnCameraArrived", SendMessageOptions.DontRequireReceiver);
         }
 
         yield break;
