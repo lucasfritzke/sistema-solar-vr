@@ -10285,7 +10285,7 @@ GameObject:
   - component: {fileID: 891679471}
   m_Layer: 5
   m_Name: Iniciar
-  m_TagString: Untagged
+  m_TagString: Selectable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -14042,7 +14042,7 @@ GameObject:
   - component: {fileID: 1732998311}
   m_Layer: 0
   m_Name: Painel Inicial
-  m_TagString: Untagged
+  m_TagString: Selectable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
