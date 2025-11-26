@@ -2252,7 +2252,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 1, y: 0, z: 0}
   radius: 5
-  orbitalSpeed: 75
+  orbitalSpeed: 32
 --- !u!114 &126
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2268,7 +2268,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 1, y: 0, z: 0}
   radius: 4.5
-  orbitalSpeed: 70
+  orbitalSpeed: 30
 --- !u!114 &127
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2284,7 +2284,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 1, y: 0, z: 0}
   radius: 4
-  orbitalSpeed: 65
+  orbitalSpeed: 27
 --- !u!114 &128
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2300,7 +2300,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 1, y: 0, z: 0}
   radius: 3.5
-  orbitalSpeed: 60
+  orbitalSpeed: 20
 --- !u!114 &129
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2316,7 +2316,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 1, y: 0, z: 0}
   radius: 3
-  orbitalSpeed: 55
+  orbitalSpeed: 15
 --- !u!114 &130
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2332,7 +2332,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 1, y: 0, z: 0}
   radius: 2.5
-  orbitalSpeed: 50
+  orbitalSpeed: 10
 --- !u!114 &131
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2364,7 +2364,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 0, y: 1, z: 0}
   radius: 7
-  orbitalSpeed: 93
+  orbitalSpeed: 90
 --- !u!114 &133
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2380,7 +2380,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 0, y: 1, z: 0}
   radius: 6.5
-  orbitalSpeed: 91
+  orbitalSpeed: 85
 --- !u!114 &134
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2396,7 +2396,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 0, y: 1, z: 0}
   radius: 6
-  orbitalSpeed: 89
+  orbitalSpeed: 80
 --- !u!114 &135
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2412,7 +2412,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 0, y: 1, z: 0}
   radius: 5.5
-  orbitalSpeed: 87
+  orbitalSpeed: 75
 --- !u!114 &136
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2428,7 +2428,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 0, y: 1, z: 0}
   radius: 5
-  orbitalSpeed: 85
+  orbitalSpeed: 70
 --- !u!114 &137
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2444,7 +2444,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 0, y: 1, z: 0}
   radius: 4.5
-  orbitalSpeed: 83
+  orbitalSpeed: 65
 --- !u!114 &138
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2460,7 +2460,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 0, y: 1, z: 0}
   radius: 4
-  orbitalSpeed: 80
+  orbitalSpeed: 60
 --- !u!114 &139
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2492,7 +2492,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 0, y: 1, z: 0}
   radius: 5.5
-  orbitalSpeed: 95
+  orbitalSpeed: 65
 --- !u!114 &141
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2508,7 +2508,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 0, y: 1, z: 0}
   radius: 5
-  orbitalSpeed: 90
+  orbitalSpeed: 60
 --- !u!114 &142
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2524,7 +2524,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 0, y: 1, z: 0}
   radius: 4.5
-  orbitalSpeed: 85
+  orbitalSpeed: 55
 --- !u!114 &143
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2540,7 +2540,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 0, y: 1, z: 0}
   radius: 4
-  orbitalSpeed: 80
+  orbitalSpeed: 50
 --- !u!114 &144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2572,7 +2572,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 0, y: 1, z: 0}
   radius: 2
-  orbitalSpeed: 90
+  orbitalSpeed: 70
 --- !u!114 &146
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2588,7 +2588,7 @@ MonoBehaviour:
   myParent: {fileID: 0}
   axis: {x: 0, y: 1, z: 0}
   radius: 1.5
-  orbitalSpeed: 80
+  orbitalSpeed: 60
 --- !u!114 &147
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16118,13 +16118,13 @@ MonoBehaviour:
     cameraLocalOffset: {x: 0, y: 0.5, z: -1.5}
     moveDuration: 3
   - targetReference: {fileID: 1476307638}
-    cameraLocalOffset: {x: 0, y: 0, z: -1.5}
+    cameraLocalOffset: {x: 0, y: 0.5, z: -1.5}
     moveDuration: 3
   - targetReference: {fileID: 1906248635}
-    cameraLocalOffset: {x: 0, y: 0.5, z: -1.8}
+    cameraLocalOffset: {x: 0, y: 0.5, z: -2}
     moveDuration: 3
   - targetReference: {fileID: 1781604911}
-    cameraLocalOffset: {x: 0, y: 0.8, z: -1.8}
+    cameraLocalOffset: {x: 0, y: 0.8, z: -2}
     moveDuration: 3
   - targetReference: {fileID: 12912110}
     cameraLocalOffset: {x: 0, y: 1, z: -7}
@@ -16133,7 +16133,7 @@ MonoBehaviour:
     cameraLocalOffset: {x: 0, y: 2, z: -8}
     moveDuration: 3
   - targetReference: {fileID: 1132136900}
-    cameraLocalOffset: {x: 1, y: 1, z: -5}
+    cameraLocalOffset: {x: 0.5, y: 1, z: -5}
     moveDuration: 3
   - targetReference: {fileID: 1741797875}
     cameraLocalOffset: {x: 0, y: 1, z: -5}
